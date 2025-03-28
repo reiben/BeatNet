@@ -1,0 +1,88 @@
+diff --git a/madmom/io/__init__.py b/madmom/io/__init__.py
+index xxxxxxx..yyyyyyy 100644
+--- a/madmom/io/__init__.py
++++ b/madmom/io/__init__.py
+@@ -18,7 +18,7 @@ import numpy as np
+ # dtype definitions
+ 
+ # standard dtype for storing segment information
+-SEGMENT_DTYPE = [('start', np.float), ('end', np.float), ('label', object)]
++SEGMENT_DTYPE = [('start', np.float64), ('end', np.float64), ('label', object)]
+ 
+ # functions for handling segments
+ 
+diff --git a/madmom/evaluation/chords.py b/madmom/evaluation/chords.py
+index xxxxxxx..yyyyyyy 100644
+--- a/madmom/evaluation/chords.py
++++ b/madmom/evaluation/chords.py
+@@ -34,17 +34,17 @@ BASS_MAPPING = {'C': 0, 'C#': 1, 'D': 2, 'Eb': 3, 'E': 4, 'F': 5, 'F#': 6,
+                 'G': 7, 'Ab': 8, 'A': 9, 'Bb': 10, 'B': 11}
+ 
+ # type definition for chords
+-CHORD_DTYPE = [('root', np.int),
+-               ('bass', np.int),
++CHORD_DTYPE = [('root', np.int32),
++               ('bass', np.int32),
+                ('intervals', np.ndarray),
+                ('type', object)]
+ 
+ # type definition for chord annotations
+-CHORD_ANN_DTYPE = [('start', np.float),
+-                   ('end', np.float),
++CHORD_ANN_DTYPE = [('start', np.float64),
++                   ('end', np.float64),
+                    ('chord', object)]
+ 
+ # define no chord
+-NO_CHORD = (-1, -1, np.zeros(12, dtype=np.int))
++NO_CHORD = (-1, -1, np.zeros(12, dtype=np.int32))
+ # define unknown chord
+-UNKNOWN_CHORD = (-1, -1, np.ones(12, dtype=np.int) * -1)
++UNKNOWN_CHORD = (-1, -1, np.ones(12, dtype=np.int32) * -1)
+
+diff --git a/madmom/features/beats_hmm.py b/madmom/features/beats_hmm.py
+index xxxxxxx..yyyyyyy 100644
+--- a/madmom/features/beats_hmm.py
++++ b/madmom/features/beats_hmm.py
+@@ -79,17 +79,17 @@ class BeatStateSpace(object):
+             elif interval < 0:
+                 num_log_intervals += 1
+         # save the intervals
+-        self.intervals = np.ascontiguousarray(intervals, dtype=np.int)
++        self.intervals = np.ascontiguousarray(intervals, dtype=np.int32)
+         # number of states and intervals
+         self.num_states = int(np.sum(intervals))
+         self.num_intervals = len(intervals)
+         # define first and last states
+         first_states = np.cumsum(np.r_[0, self.intervals[:-1]])
+-        self.first_states = first_states.astype(np.int)
++        self.first_states = first_states.astype(np.int32)
+         self.last_states = np.cumsum(self.intervals) - 1
+         # define the positions and intervals of the states
+         self.state_positions = np.empty(self.num_states)
+-        self.state_intervals = np.empty(self.num_states, dtype=np.int)
++        self.state_intervals = np.empty(self.num_states, dtype=np.int32)
+         # Note: having an index counter is faster than ndenumerate
+         idx = 0
+         # spread the states evenly over the unit circle
+@@ -149,8 +149,8 @@ class BarStateSpace(BeatStateSpace):
+         # then add the beat position to each state
+         self.state_positions = np.empty((len(self.state_positions) *
+                                         beats_per_bar))
+-        self.state_intervals = np.empty(0, dtype=np.int)
+-        self.state_phases = np.empty(0, dtype=np.int)
++        self.state_intervals = np.empty(0, dtype=np.int32)
++        self.state_phases = np.empty(0, dtype=np.int32)
+         idx = 0
+         # create states for each beat position
+         for beat in range(beats_per_bar):
+@@ -159,7 +159,7 @@ class BarStateSpace(BeatStateSpace):
+                 super(BarStateSpace, self).state_positions)
+             self.state_intervals = np.hstack((self.state_intervals, (
+                 super(BarStateSpace, self).state_intervals)))
+-            self.state_phases = np.hstack((self.state_phases, beat *
+-                                          np.ones(num_states, dtype=np.int)))
++            self.state_phases = np.hstack((self.state_phases, beat * 
++                                          np.ones(num_states, dtype=np.int32)))
+             idx += num_states
+ 
